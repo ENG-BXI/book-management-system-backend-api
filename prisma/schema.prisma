@@ -13,3 +13,51 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  User
+  Admin
+}
+
+model User {
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  password     String
+  role         Role   @default(User)
+  favoriteBook Book[] @relation("FavoriteBooks")
+  readLater    Book[] @relation("ReadLater")
+}
+
+enum BookStatus {
+  available
+  unAvailable
+}
+
+model Category {
+  id    String @id @default(uuid())
+  name  String @unique
+  books Book[]
+}
+
+model Author {
+  id          String  @id @default(uuid())
+  name        String  @unique()
+  description String?
+  books       Book[]
+}
+
+model Book {
+  id            String     @id @default(uuid())
+  name          String
+  description   String?
+  coverImage    String?
+  categoryId    String
+  category      Category   @relation(fields: [categoryId], references: [id])
+  authorId      String
+  author        Author     @relation(fields: [authorId], references: [id])
+  createdAt     DateTime
+  status        BookStatus @default(available)
+  FavoriteBooks User[]     @relation("FavoriteBooks")
+  ReadLater     User[]     @relation("ReadLater")
+}

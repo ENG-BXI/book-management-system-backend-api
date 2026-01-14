@@ -1,26 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
+import { PrismaService } from 'src/Prisma/prisma.service';
 
 @Injectable()
 export class AuthorService {
-  create(createAuthorDto: CreateAuthorDto) {
-    return 'This action adds a new author';
-  }
+  constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all author`;
+  async getAllAuthors() {
+    try {
+      const authors = await this.prisma.author.findMany({
+        include: { books: true },
+      });
+      return authors;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} author`;
+  async getAuthorById(id: string) {
+    try {
+      const Author = await this.prisma.author.findUnique({ where: { id } });
+      return Author;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
-
-  update(id: number, updateAuthorDto: UpdateAuthorDto) {
-    return `This action updates a #${id} author`;
+  async createAuthor(createAuthorDto: CreateAuthorDto) {
+    try {
+      const newAuthor = await this.prisma.author.create({
+        data: createAuthorDto,
+      });
+      return newAuthor;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} author`;
+  async editAuthor(id: string, author: UpdateAuthorDto) {
+    try {
+      const updatedAuthor = await this.prisma.author.update({
+        where: { id },
+        data: { ...author },
+      });
+      return updatedAuthor;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+  async deleteAuthor(id: string) {
+    try {
+      const deletedAuthor = await this.prisma.author.delete({
+        where: { id },
+      });
+      return deletedAuthor;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 }

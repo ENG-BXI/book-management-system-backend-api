@@ -5,9 +5,18 @@ import { BookModule } from './book/book.module';
 import { AuthorModule } from './author/author.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { CategoryModule } from './category/category.module';
 
 @Module({
-  imports: [BookModule, AuthorModule, UserModule, AuthModule],
+  imports: [
+    ConfigModule.forRoot(),
+    BookModule,
+    AuthorModule,
+    UserModule,
+    AuthModule,
+    CategoryModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
