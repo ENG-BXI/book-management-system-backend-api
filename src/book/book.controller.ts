@@ -10,10 +10,12 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { ChangeBookStatusDto } from './dto/changeBookStatus.dto';
 
 @Controller('book')
 export class BookController {
@@ -35,8 +37,12 @@ export class BookController {
     };
   }
   @Get()
-  async GetAllBooks() {
-    const books = await this.bookService.getAllBooks();
+  async GetAllBooks(
+    @Query('search') search: string,
+    @Query('filter') filter: string,
+  ) {
+    console.log(search, filter);
+    const books = await this.bookService.getAllBooks(search, filter);
     if (!books) {
       return {
         data: [],
@@ -77,6 +83,18 @@ export class BookController {
     return {
       data: deleteBook,
       message: 'Book deleted successfully',
+      status: HttpStatus.OK,
+    };
+  }
+  @Patch('change-book-status/:id')
+  async changeBookStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ValidationPipe()) book: ChangeBookStatusDto,
+  ) {
+    const updatedBook = await this.bookService.changeStatus(id, book.status);
+    return {
+      data: updatedBook,
+      message: 'Book status updated successfully',
       status: HttpStatus.OK,
     };
   }
