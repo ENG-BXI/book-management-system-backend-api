@@ -18,12 +18,27 @@ import { UpdateAuthorDto } from './dto/update-author.dto';
 import { Roles } from 'src/Common/Decorators/roles.decorator';
 import { RolesGuard } from 'src/Common/Guards/roles.guard';
 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+
+@ApiTags('Authors')
+@ApiBearerAuth('JWT-auth')
 @Controller('author')
 @UseGuards(RolesGuard)
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
   @Get()
   @Roles([])
+  @ApiOperation({ summary: 'Retrieve a list of all authors' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of authors retrieved successfully',
+  })
   async getAllAuthor() {
     const authors = await this.authorService.getAllAuthors();
     if (!authors) {
@@ -37,6 +52,10 @@ export class AuthorController {
   }
   @Get(':id')
   @Roles([])
+  @ApiOperation({ summary: 'Get details of a specific author' })
+  @ApiParam({ name: 'id', description: 'The UUID of the author' })
+  @ApiResponse({ status: 200, description: 'Author details found' })
+  @ApiResponse({ status: 404, description: 'Author not found' })
   async getAuthorById(@Param('id', ParseUUIDPipe) id: string) {
     const author = await this.authorService.getAuthorById(id);
     if (!author) {
@@ -50,6 +69,9 @@ export class AuthorController {
   }
   @Post()
   @Roles(['Admin'])
+  @ApiOperation({ summary: 'Create a new author record (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Author created successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Requires Admin role' })
   async create(@Body(new ValidationPipe()) createAuthorDto: CreateAuthorDto) {
     const newUser = await this.authorService.createAuthor(createAuthorDto);
     return {
@@ -60,6 +82,10 @@ export class AuthorController {
   }
   @Patch(':id')
   @Roles(['Admin'])
+  @ApiOperation({ summary: 'Update an existing author record (Admin only)' })
+  @ApiParam({ name: 'id', description: 'The UUID of the author to update' })
+  @ApiResponse({ status: 200, description: 'Author updated successfully' })
+  @ApiResponse({ status: 404, description: 'Author not found' })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body(new ValidationPipe()) updateAuthorDto: UpdateAuthorDto,
@@ -79,6 +105,10 @@ export class AuthorController {
   }
   @Delete(':id')
   @Roles(['Admin'])
+  @ApiOperation({ summary: 'Delete an author record (Admin only)' })
+  @ApiParam({ name: 'id', description: 'The UUID of the author to delete' })
+  @ApiResponse({ status: 200, description: 'Author deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Author not found' })
   async deleteAuthor(@Param('id', ParseUUIDPipe) id: string) {
     const deletedAuthor = await this.authorService.deleteAuthor(id);
     if (!deletedAuthor) {
