@@ -92,4 +92,34 @@ export class BookService {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
+  async getLatestBook() {
+    try {
+      const latestBook = await this.prisma.book.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 10,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          coverImage: true,
+          status: true,
+          author: {
+            select: {
+              name: true,
+            },
+          },
+          category: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+      return latestBook;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
 }

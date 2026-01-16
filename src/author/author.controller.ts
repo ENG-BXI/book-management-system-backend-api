@@ -10,15 +10,20 @@ import {
   HttpException,
   ParseUUIDPipe,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
+import { Roles } from 'src/Common/Decorators/roles.decorator';
+import { RolesGuard } from 'src/Common/Guards/roles.guard';
 
 @Controller('author')
+@UseGuards(RolesGuard)
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
   @Get()
+  @Roles([])
   async getAllAuthor() {
     const authors = await this.authorService.getAllAuthors();
     if (!authors) {
@@ -31,6 +36,7 @@ export class AuthorController {
     };
   }
   @Get(':id')
+  @Roles([])
   async getAuthorById(@Param('id', ParseUUIDPipe) id: string) {
     const author = await this.authorService.getAuthorById(id);
     if (!author) {
@@ -43,6 +49,7 @@ export class AuthorController {
     };
   }
   @Post()
+  @Roles(['Admin'])
   async create(@Body(new ValidationPipe()) createAuthorDto: CreateAuthorDto) {
     const newUser = await this.authorService.createAuthor(createAuthorDto);
     return {
@@ -52,6 +59,7 @@ export class AuthorController {
     };
   }
   @Patch(':id')
+  @Roles(['Admin'])
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body(new ValidationPipe()) updateAuthorDto: UpdateAuthorDto,
@@ -70,6 +78,7 @@ export class AuthorController {
     };
   }
   @Delete(':id')
+  @Roles(['Admin'])
   async deleteAuthor(@Param('id', ParseUUIDPipe) id: string) {
     const deletedAuthor = await this.authorService.deleteAuthor(id);
     if (!deletedAuthor) {
